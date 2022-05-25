@@ -1,0 +1,10 @@
+node_modules
+.vscode
+html/
+scripts/
+nginx.conf
+*.json
+*.sh
+Dockerfile
+README.md
+*.yaml
