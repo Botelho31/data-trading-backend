@@ -17,12 +17,12 @@ const userRoute = require('./routes/user-route');
 
 app.use('/user', userRoute);
 
-const imageRoute = require('./routes/image-route');
+const tradeRoute = require('./routes/trade-route');
 
-app.use('/image', imageRoute);
+app.use('/trade', tradeRoute);
 
 app.get('/', (req, res) => {
-  res.send('One million pixels');
+  res.send('TCC');
 });
 
 app.listen(8080);
