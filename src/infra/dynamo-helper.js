@@ -81,6 +81,21 @@ module.exports = {
     const finalData = await module.exports.performCompleteQuery(data, params);
     return new Promise((resolve) => resolve(finalData));
   },
+  async updateObject (table, Key, valueName, newValue, object) {
+    const params = {
+      TableName : table,
+      Key,
+      UpdateExpression: `set #valuename = :newvalue`,
+      ExpressionAttributeValues: {
+          ":newvalue": newValue
+      },
+      ExpressionAttributeNames: {
+        "#valuename": valueName 
+      }
+    };
+    await docClient.update(params).promise()
+    return new Promise((resolve) => resolve(object))
+  },
   getRandomKey() {
     const CUSTOMEPOCH = 1300000000000; // artificial epoch
     let ts = Number(new Date().getTime() - CUSTOMEPOCH);// limit to recent
