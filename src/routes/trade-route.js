@@ -3,12 +3,12 @@ const router = require('express').Router();
 const Schema = require('../domain/models/trade');
 const Controller = require('../controller/trade-controller');
 
-router.post('/trade',
+router.post('/',
   celebrate({
     [Segments.BODY]: Schema,
   }), Controller.createTrade);
 
-router.get('/trade/circleId/:circleId',
+router.get('/circleId/:circleId',
   celebrate({
     [Segments.PARAMS]: Joi.object({ circleId: Joi.string().required() }),
   }), Controller.getAll);
