@@ -1,5 +1,3 @@
-const crypto = require('crypto');
-const jwtHelper = require('../infra/jwt-helper');
 const dynamoHelper = require('../infra/dynamo-helper');
 
 const tableName = 'user';
@@ -7,18 +5,19 @@ const tableName = 'user';
 module.exports = {
   async createTrade(req, res, next) {
     try {
-      if(req.body.id === null){
+      if (req.body.id === null) {
         const trade = await dynamoHelper.create(tableName, req.body);
-        console.log(trade);
         return res.json(trade);
-      } else if(req.body.saleTo !== null) {
+      }
+      if (req.body.saleTo !== null) {
         const trade = await dynamoHelper.updateObject(tableName, {
-          id: req.body.id
+          id: req.body.id,
         }, 'saleTo', req.body.saleTo);
         return res.json(trade);
+      // eslint-disable-next-line no-else-return
       } else {
         const trade = await dynamoHelper.updateObject(tableName, {
-          id: req.body.id
+          id: req.body.id,
         }, 'saleFrom', req.body.saleFrom);
         return res.json(trade);
       }
@@ -28,16 +27,19 @@ module.exports = {
   },
   async getAll(req, res, next) {
     try {
-      const { circleId } = req.body;
-      const user = await dynamoHelper.queryTableWhereId(tableName, 'publicAddress', publicAddress);
-      if (user !== undefined) {
-        return res.status(409).json({ message: 'PUBLIC_ADDRESS_ALREADY_EXISTS' });
+      const { circleId } = req.params;
+
+      const trades = await dynamoHelper.scan(tableName);
+      const tradesInCircle = [];
+      for (let i = 0; i < trades.length; i += 1) {
+        const element = trades[i];
+        if (element.circleId === circleId) {
+          tradesInCircle.push(element);
+        }
       }
-      const nonce = await module.exports.createNonce(publicAddress);
-      req.body.nonce = nonce;
-      return res.json(req.body);
+      return res.json(tradesInCircle);
     } catch (error) {
       return next(error);
     }
   },
-}
+};
