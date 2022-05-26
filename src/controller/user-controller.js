@@ -55,4 +55,21 @@ module.exports = {
       return next(error);
     }
   },
+  async getAllFromCircle(req, res, next) {
+    try {
+      const { circleId } = req.params;
+
+      const users = await dynamoHelper.scan(tableName);
+      const usersInCircle = [];
+      for (let i = 0; i < users.length; i += 1) {
+        const element = users[i];
+        if (element.circleIds.includes(circleId)) {
+          usersInCircle.push(element);
+        }
+      }
+      return res.json(usersInCircle);
+    } catch (error) {
+      return next(error);
+    }
+  },
 };

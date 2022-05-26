@@ -20,4 +20,12 @@ router.post('/verify-auth',
     }),
   }), Controller.verifyAuth);
 
+router.post('/circleId/:circleId',
+  celebrate({
+    [Segments.BODY]: Joi.object({
+      nonce: Joi.string().required(),
+    }),
+    [Segments.PARAMS]: Joi.object({ circleId: Joi.string().required() }),
+  }), Controller.getAllFromCircle);
+
 module.exports = router;
