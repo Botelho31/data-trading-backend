@@ -25,6 +25,25 @@ module.exports = {
       return next(error);
     }
   },
+  async enterTrade(req, res, next) {
+    try {
+      const trade = await dynamoHelper.queryTableWhereId(tableName, 'id', req.body.tradeId);
+      if (req.body.saleTo == null) {
+        await dynamoHelper.updateObject(tableName, {
+          id: req.body.tradeId,
+        }, 'saleTo', req.body.publicAddress);
+      } else {
+        await dynamoHelper.updateObject(tableName, {
+          id: req.body.tradeId,
+        }, 'saleFrom', req.body.publicAddress);
+      }
+      // UPDATE TRADE
+      // RETURN TRADE
+      return res.json(trade);
+    } catch (error) {
+      return next(error);
+    }
+  },
   async getAll(req, res, next) {
     try {
       const { circleId } = req.params;

@@ -8,8 +8,18 @@ router.post('/',
     [Segments.BODY]: Schema,
   }), Controller.createTrade);
 
+router.put('/enter',
+  celebrate({
+    [Segments.BODY]: Joi.object({
+      circleId: Joi.string().required(),
+      tradeId: Joi.string().required(),
+      publicAddress: Joi.string().required(),
+    }),
+  }), Controller.enterTrade);
+
 router.get('/circleId/:circleId',
   celebrate({
     [Segments.PARAMS]: Joi.object({ circleId: Joi.string().required() }),
   }), Controller.getAll);
+
 module.exports = router;
