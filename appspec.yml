@@ -11,9 +11,6 @@ hooks:
   AfterInstall:
     - location: ./scripts/after_install.sh
       runas: root
-  ApplicationStop:
-    - location: ./scripts/application_stop.sh
-      runas: root
   ApplicationStart:
     - location: ./scripts/application_start.sh
       runas: root
