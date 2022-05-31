@@ -17,6 +17,7 @@ router.post('/verify-auth',
   celebrate({
     [Segments.BODY]: Joi.object({
       nonce: Joi.string().required(),
+      publicAddress: Joi.string().required(),
     }),
   }), Controller.verifyAuth);
 
