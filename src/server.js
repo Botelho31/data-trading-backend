@@ -22,6 +22,10 @@ const tradeRoute = require('./routes/trade-route');
 
 app.use('/trade', tradeRoute);
 
+const circleRoute = require('./routes/circle-route');
+
+app.use('/circle', circleRoute);
+
 app.get('/', (req, res) => {
   res.send('TCC');
 });
