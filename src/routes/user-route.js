@@ -1,5 +1,7 @@
 const { Joi, celebrate, Segments } = require('celebrate');
 const router = require('express').Router();
+const ethers = require('ethers');
+const jwtHelper = require('../infra/jwt-helper');
 const Schema = require('../domain/models/user');
 const Controller = require('../controller/user-controller');
 
@@ -20,6 +22,12 @@ router.post('/verify-auth',
       publicAddress: Joi.string().required(),
     }),
   }), Controller.verifyAuth);
+
+router.get('/verify-token',
+  jwtHelper.authenticateToken,
+  (req, res) => {
+    res.json({});
+  });
 
 router.get('/circleId/:circleId',
   celebrate({

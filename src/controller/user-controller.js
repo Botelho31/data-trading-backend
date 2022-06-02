@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const jwtHelper = require('../infra/jwt-helper');
 const dynamoHelper = require('../infra/dynamo-helper');
+const { ethers } = require('ethers');
 
 const tableName = 'user';
 
@@ -34,7 +35,7 @@ module.exports = {
       if (user === undefined) {
         return res.status(404).json({ message: 'PUBLIC_ADDRESS_DOES_NOT_EXIST' });
       }
-      const nonce = module.exports.createNonce(publicAddress);
+      const nonce = await module.exports.createNonce(publicAddress);
       return res.json({ nonce });
     } catch (error) {
       return next(error);
@@ -42,15 +43,15 @@ module.exports = {
   },
   async verifyAuth(req, res, next) {
     try {
-      const { publicAddress, signedNonce } = req.body;
-      const descriptedNonce = crypto.publicDecrypt(publicAddress, signedNonce);
+      const { publicAddress, nonce } = req.body;
       const row = await dynamoHelper.queryTableWhereId(tableName, 'publicAddress', publicAddress);
-      if (row.nonce === descriptedNonce) {
-        const jwtsecret = jwtHelper.generateAccessToken(row.publicAddress);
+      const response = await ethers.utils.verifyMessage(row.nonce, nonce);
+      if (publicAddress === response) {
+        const jwtsecret = jwtHelper.generateAccessToken(row);
         await module.exports.createNonce(publicAddress);
         return res.json(jwtsecret);
       }
-      return res.status(401).json('NOT_AUTHORDIZED');
+      return res.status(401).json('NOT_AUTHORIZED');
     } catch (error) {
       return next(error);
     }
