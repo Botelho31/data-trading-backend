@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "ts-node src/server.ts",
+    "start": "nodemon src/server.ts",
     "prepare": "husky install"
   },
   "jest": {
@@ -24,6 +24,7 @@
     "dotenv": "^10.0.0",
     "ethers": "^5.6.8",
     "express": "^4.17.1",
+    "fast-glob": "^3.2.11",
     "jsonwebtoken": "^8.5.1",
     "knex": "^2.1.0",
     "knex-stringcase": "^1.4.6",

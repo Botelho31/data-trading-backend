@@ -4,7 +4,7 @@ import { authenticateToken } from '../infra/jwt-helper'
 import Schema from '../domain/models/user'
 import * as Controller from '../controller/user-controller'
 
-const baseRoute = 'user'
+const baseRoute = '/user'
 
 export default (router: Router): void => {
   router.post(baseRoute + '/signup',
@@ -12,10 +12,7 @@ export default (router: Router): void => {
       [Segments.BODY]: Schema
     }), Controller.signup)
 
-  router.get(baseRoute + '/nonce/:publicAddress',
-    celebrate({
-      [Segments.PARAMS]: Joi.object({ publicAddress: Joi.string().required() })
-    }), Controller.getNonce)
+  router.get(baseRoute + '/nonce/:publicAddress', Controller.getNonce)
 
   router.post(baseRoute + '/verify-auth',
     celebrate({

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express'
 import knex from '../database'
+import * as jwtHelper from '../infra/jwt-helper'
+import { ethers } from 'ethers'
 const crypto = require('crypto')
-const { ethers } = require('ethers')
-const jwtHelper = require('../infra/jwt-helper')
 
 const tableName = 'user'
 
@@ -20,7 +20,8 @@ export async function signup (req: Request, res: Response, next: NextFunction) {
     const results = await knex(tableName)
       .where({ publicAddress })
     if (results.length > 0) {
-      return res.status(409).json({ message: 'PUBLIC_ADDRESS_ALREADY_EXISTS' })
+      res.status(409)
+      return res.json({ message: 'PUBLIC_ADDRESS_ALREADY_EXISTS' })
     }
     await knex(tableName).insert(req.body)
     return res.json(req.body)
@@ -34,8 +35,9 @@ export async function getNonce (req: Request, res: Response, next: NextFunction)
     const { publicAddress } = req.params
     const results = await knex(tableName)
       .where({ publicAddress })
-    if (results.length > 0) {
-      return res.status(404).json({ message: 'PUBLIC_ADDRESS_DOES_NOT_EXIST' })
+    if (results.length === 0) {
+      res.status(404)
+      return res.json({ message: 'PUBLIC_ADDRESS_DOES_NOT_EXIST' })
     }
     const nonce = await module.exports.createNonce(publicAddress)
     return res.json({ nonce })
@@ -47,14 +49,20 @@ export async function getNonce (req: Request, res: Response, next: NextFunction)
 export async function verifyAuth (req: Request, res: Response, next: NextFunction) {
   try {
     const { publicAddress, nonce } = req.body
-    const row = await knex(tableName).where({ publicAddress })
-    const response = await ethers.utils.verifyMessage(row.nonce, nonce)
+    const results = await knex(tableName).where({ publicAddress })
+    if (results.length === 0) {
+      res.status(404)
+      return res.json({ message: 'PUBLIC_ADDRESS_DOES_NOT_EXIST' })
+    }
+    const row = results[0]
+    const response = ethers.utils.verifyMessage(row.nonce, nonce)
     if (publicAddress === response) {
       const jwtsecret = jwtHelper.generateAccessToken(row)
       await module.exports.createNonce(publicAddress)
       return res.json(jwtsecret)
     }
-    return res.status(401).json('NOT_AUTHORIZED')
+    res.status(401)
+    return res.json('NOT_AUTHORIZED')
   } catch (error) {
     return next(error)
   }
