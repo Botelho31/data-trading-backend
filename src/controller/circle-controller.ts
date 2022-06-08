@@ -1,13 +1,24 @@
-import { Request, Response, NextFunction } from 'express'
+import { Response, NextFunction } from 'express'
 import { hasRequestedEntry } from '../infra/web3/web3-helper'
 import knex from '../database'
 
 const tableName = 'circle'
 
-export async function getAll (req: Request, res: Response, next: NextFunction) {
+export async function getAll (req: any, res: Response, next: NextFunction) {
   try {
     const circles = await knex(tableName)
-    return res.json(circles)
+    let userCircles = await knex('circle_user')
+      .where({ publicAddress: req.user.publicAddress })
+    userCircles = userCircles.map((v: any) => v.circleAddress)
+    let entryRequests = await knex('entry_request')
+      .where({ publicAddress: req.user.publicAddress })
+    entryRequests = entryRequests.map((v: any) => v.circleAddress)
+    const newCircles = circles
+    for (let i = 0; i < circles.length; i += 1) {
+      newCircles[i].isTrader = userCircles.includes(circles[i].publicAddress)
+      newCircles[i].hasRequestedEntry = entryRequests.includes(circles[i].publicAddress)
+    }
+    return res.json(newCircles)
   } catch (error) {
     return next(error)
   }
