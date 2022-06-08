@@ -72,7 +72,7 @@ export async function getAllFromCircle (req: Request, res: Response, next: NextF
   try {
     const { circleAddress } = req.params
 
-    const users = await knex('circle-users').where({ circleAddress })
+    const users = await knex('circle_user').where({ circleAddress })
     return res.json(users)
   } catch (error) {
     return next(error)

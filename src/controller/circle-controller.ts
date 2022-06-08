@@ -24,6 +24,17 @@ export async function getAll (req: any, res: Response, next: NextFunction) {
   }
 }
 
+export async function getEntryRequests (req: any, res: Response, next: NextFunction) {
+  try {
+    const { circleAddress } = req.params
+    const requests = await knex('entry_request')
+      .where({ circleAddress })
+    return res.json(requests)
+  } catch (error) {
+    return next(error)
+  }
+}
+
 export async function updateUserStatus (req: any, res: Response, next: NextFunction) {
   try {
     const hasBeenRequested = await hasRequestedEntry(req.user.publicAddress, req.body.circleAddress)

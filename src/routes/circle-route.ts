@@ -10,6 +10,15 @@ export default (router: Router): void => {
     authenticateToken,
     Controller.getAll)
 
+  router.get(baseRoute + '/:circleAddress/entry-request',
+    authenticateToken,
+    celebrate({
+      [Segments.PARAMS]: Joi.object({
+        circleAddress: Joi.string().required()
+      })
+    }),
+    Controller.getEntryRequests)
+
   router.put(baseRoute + '/update-user-status',
     authenticateToken,
     celebrate({
