@@ -3,7 +3,7 @@ import { authenticateToken } from '../infra/jwt-helper'
 import * as Controller from '../controller/circle-controller'
 import { Router } from 'express'
 
-const baseRoute = 'circle'
+const baseRoute = '/circle'
 
 export default (router: Router): void => {
   router.get(baseRoute + '/',

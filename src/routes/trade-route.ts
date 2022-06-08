@@ -4,7 +4,7 @@ import * as Controller from '../controller/trade-controller'
 import Schema from '../domain/models/trade'
 import { Joi, celebrate, Segments } from 'celebrate'
 
-const baseRoute = 'trade'
+const baseRoute = '/trade'
 
 export default (router: Router): void => {
   router.post(baseRoute + '/',
