@@ -1,26 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
-const dynamoHelper = require('../infra/dynamo-helper')
+import knex from '../database'
 
-const tableName = 'user'
+const tableName = 'trade'
 
 export async function createTrade (req: Request, res: Response, next: NextFunction) {
   try {
-    if (req.body.id === null) {
-      const trade = await dynamoHelper.create(tableName, req.body)
-      return res.json(trade)
-    }
-    if (req.body.saleTo !== null) {
-      const trade = await dynamoHelper.updateObject(tableName, {
-        id: req.body.id
-      }, 'saleTo', req.body.saleTo)
-      return res.json(trade)
-    // eslint-disable-next-line no-else-return
-    } else {
-      const trade = await dynamoHelper.updateObject(tableName, {
-        id: req.body.id
-      }, 'saleFrom', req.body.saleFrom)
-      return res.json(trade)
-    }
+    await knex(tableName).insert(req.body)
+    res.json(req.body)
   } catch (error) {
     return next(error)
   }
@@ -28,19 +14,15 @@ export async function createTrade (req: Request, res: Response, next: NextFuncti
 
 export async function enterTrade (req: Request, res: Response, next: NextFunction) {
   try {
-    const trade = await dynamoHelper.queryTableWhereId(tableName, 'id', req.body.tradeId)
-    if (req.body.saleTo == null) {
-      await dynamoHelper.updateObject(tableName, {
-        id: req.body.tradeId
-      }, 'saleTo', req.body.publicAddress)
+    const { idTrade, publicAddress } = req.body
+    const trade = await knex(tableName).where({ idTrade })
+    if (trade.saleTo == null) {
+      await knex(tableName).update({ saleTo: publicAddress }).where({ idTrade })
     } else {
-      await dynamoHelper.updateObject(tableName, {
-        id: req.body.tradeId
-      }, 'saleFrom', req.body.publicAddress)
+      await knex(tableName).update({ saleFrom: publicAddress }).where({ idTrade })
     }
-    // UPDATE TRADE
-    // RETURN TRADE
-    return res.json(trade)
+    const newTrade = await knex(tableName).where({ idTrade })
+    return res.json(newTrade)
   } catch (error) {
     return next(error)
   }
@@ -48,17 +30,10 @@ export async function enterTrade (req: Request, res: Response, next: NextFunctio
 
 export async function getAll (req: Request, res: Response, next: NextFunction) {
   try {
-    const { circleId } = req.params
+    const { circleAddress } = req.params
 
-    const trades = await dynamoHelper.scan(tableName)
-    const tradesInCircle = []
-    for (let i = 0; i < trades.length; i += 1) {
-      const element = trades[i]
-      if (element.circleId === circleId) {
-        tradesInCircle.push(element)
-      }
-    }
-    return res.json(tradesInCircle)
+    const trades = await knex(tableName).where({ circleAddress })
+    return res.json(trades)
   } catch (error) {
     return next(error)
   }

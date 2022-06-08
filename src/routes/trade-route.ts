@@ -17,15 +17,17 @@ export default (router: Router): void => {
     authenticateToken,
     celebrate({
       [Segments.BODY]: Joi.object({
-        circleId: Joi.string().required(),
-        tradeId: Joi.string().required(),
+        circleAddress: Joi.string().required(),
+        idTrade: Joi.number().required(),
         publicAddress: Joi.string().required()
       })
     }), Controller.enterTrade)
 
-  router.get(baseRoute + '/circleId/:circleId',
+  router.get(baseRoute + '/circleAddress/:circleAddress',
     authenticateToken,
     celebrate({
-      [Segments.PARAMS]: Joi.object({ circleId: Joi.string().required() })
+      [Segments.PARAMS]: Joi.object({
+        circleAddress: Joi.string().required()
+      })
     }), Controller.getAll)
 }

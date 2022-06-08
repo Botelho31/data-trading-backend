@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
 import { hasRequestedEntry } from '../infra/web3/web3-helper'
-const dynamoHelper = require('../infra/dynamo-helper')
+import knex from '../database'
 
 const tableName = 'circle'
 
 export async function getAll (req: Request, res: Response, next: NextFunction) {
   try {
-    const circles = await dynamoHelper.scan(tableName)
+    const circles = await knex(tableName)
     return res.json(circles)
   } catch (error) {
     return next(error)
@@ -21,7 +21,7 @@ export async function putEntryRequest (req: any, res: Response, next: NextFuncti
         circleAddress: req.body.circleAddress,
         publicAddress: req.user.publicAddress
       }
-      await dynamoHelper.create('entry-request', obj)
+      await knex('entry-request').insert(obj)
       return res.json(obj)
     }
     return res.status(403).json({ message: 'REQUEST-HAS-NOT-BEEN-MADE' })

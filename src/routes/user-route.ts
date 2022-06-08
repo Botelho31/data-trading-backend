@@ -31,9 +31,9 @@ export default (router: Router): void => {
       res.json({})
     })
 
-  router.get(baseRoute + '/circleId/:circleId',
+  router.get(baseRoute + '/circleAddress/:circleAddress',
     authenticateToken,
     celebrate({
-      [Segments.PARAMS]: Joi.object({ circleId: Joi.string().required() })
+      [Segments.PARAMS]: Joi.object({ circleAddress: Joi.string().required() })
     }), Controller.getAllFromCircle)
 }
