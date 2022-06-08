@@ -16,9 +16,9 @@ export async function createNonce (publicAddress: string) : Promise<String> {
 
 export async function signup (req: Request, res: Response, next: NextFunction) {
   try {
-    const { publicAddress } = req.body
+    const { publicAddress, email } = req.body
     const results = await knex(tableName)
-      .where({ publicAddress })
+      .where({ publicAddress }).orWhere({ email })
     if (results.length > 0) {
       res.status(409)
       return res.json({ message: 'PUBLIC_ADDRESS_ALREADY_EXISTS' })

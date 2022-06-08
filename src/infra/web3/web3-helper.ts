@@ -9,3 +9,9 @@ export async function hasRequestedEntry (address: string, contractAddress: strin
   const response = await DTCContract.methods.hasRequestedEntry(address).call()
   return response
 }
+
+export async function isTraderPresent (address: string, contractAddress: string) {
+  const DTCContract = new web3.eth.Contract(contractAbi as AbiItem[], contractAddress)
+  const response = await DTCContract.methods.isTraderPresent(address).call()
+  return response
+}

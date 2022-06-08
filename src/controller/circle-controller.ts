@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express'
-import { hasRequestedEntry } from '../infra/web3/web3-helper'
+import { hasRequestedEntry, isTraderPresent } from '../infra/web3/web3-helper'
 import knex from '../database'
 
 const tableName = 'circle'
@@ -24,16 +24,21 @@ export async function getAll (req: any, res: Response, next: NextFunction) {
   }
 }
 
-export async function putEntryRequest (req: any, res: Response, next: NextFunction) {
+export async function updateUserStatus (req: any, res: Response, next: NextFunction) {
   try {
     const hasBeenRequested = await hasRequestedEntry(req.user.publicAddress, req.body.circleAddress)
+    const isTrader = await isTraderPresent(req.user.publicAddress, req.body.circleAddress)
+    const obj = {
+      circleAddress: req.body.circleAddress,
+      publicAddress: req.user.publicAddress
+    }
     if (hasBeenRequested) {
-      const obj = {
-        circleAddress: req.body.circleAddress,
-        publicAddress: req.user.publicAddress
-      }
-      await knex('entry-request').insert(obj)
-      return res.json(obj)
+      await knex('entry_request').insert(obj)
+      return obj
+    }
+    if (isTrader) {
+      await knex('circle_user').insert(obj)
+      return obj
     }
     return res.status(403).json({ message: 'REQUEST-HAS-NOT-BEEN-MADE' })
   } catch (error) {
