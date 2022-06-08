@@ -1,64 +1,64 @@
-const dynamoHelper = require('../infra/dynamo-helper');
+const dynamoHelper = require('../infra/dynamo-helper')
 
-const tableName = 'user';
+const tableName = 'user'
 
 module.exports = {
-  async createTrade(req, res, next) {
+  async createTrade (req, res, next) {
     try {
       if (req.body.id === null) {
-        const trade = await dynamoHelper.create(tableName, req.body);
-        return res.json(trade);
+        const trade = await dynamoHelper.create(tableName, req.body)
+        return res.json(trade)
       }
       if (req.body.saleTo !== null) {
         const trade = await dynamoHelper.updateObject(tableName, {
-          id: req.body.id,
-        }, 'saleTo', req.body.saleTo);
-        return res.json(trade);
+          id: req.body.id
+        }, 'saleTo', req.body.saleTo)
+        return res.json(trade)
       // eslint-disable-next-line no-else-return
       } else {
         const trade = await dynamoHelper.updateObject(tableName, {
-          id: req.body.id,
-        }, 'saleFrom', req.body.saleFrom);
-        return res.json(trade);
+          id: req.body.id
+        }, 'saleFrom', req.body.saleFrom)
+        return res.json(trade)
       }
     } catch (error) {
-      return next(error);
+      return next(error)
     }
   },
-  async enterTrade(req, res, next) {
+  async enterTrade (req, res, next) {
     try {
-      const trade = await dynamoHelper.queryTableWhereId(tableName, 'id', req.body.tradeId);
+      const trade = await dynamoHelper.queryTableWhereId(tableName, 'id', req.body.tradeId)
       if (req.body.saleTo == null) {
         await dynamoHelper.updateObject(tableName, {
-          id: req.body.tradeId,
-        }, 'saleTo', req.body.publicAddress);
+          id: req.body.tradeId
+        }, 'saleTo', req.body.publicAddress)
       } else {
         await dynamoHelper.updateObject(tableName, {
-          id: req.body.tradeId,
-        }, 'saleFrom', req.body.publicAddress);
+          id: req.body.tradeId
+        }, 'saleFrom', req.body.publicAddress)
       }
       // UPDATE TRADE
       // RETURN TRADE
-      return res.json(trade);
+      return res.json(trade)
     } catch (error) {
-      return next(error);
+      return next(error)
     }
   },
-  async getAll(req, res, next) {
+  async getAll (req, res, next) {
     try {
-      const { circleId } = req.params;
+      const { circleId } = req.params
 
-      const trades = await dynamoHelper.scan(tableName);
-      const tradesInCircle = [];
+      const trades = await dynamoHelper.scan(tableName)
+      const tradesInCircle = []
       for (let i = 0; i < trades.length; i += 1) {
-        const element = trades[i];
+        const element = trades[i]
         if (element.circleId === circleId) {
-          tradesInCircle.push(element);
+          tradesInCircle.push(element)
         }
       }
-      return res.json(tradesInCircle);
+      return res.json(tradesInCircle)
     } catch (error) {
-      return next(error);
+      return next(error)
     }
-  },
-};
+  }
+}

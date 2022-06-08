@@ -1,4 +1,4 @@
-const { Joi } = require('celebrate');
+const { Joi } = require('celebrate')
 
 module.exports = Joi.object({
   circleId: Joi.string().required(),
@@ -7,5 +7,5 @@ module.exports = Joi.object({
   description: Joi.string().required(),
   name: Joi.string().required(),
   price: Joi.string().required(),
-  id: Joi.string(),
-}).or('saleFrom', 'saleTo');
+  id: Joi.string()
+}).or('saleFrom', 'saleTo')
