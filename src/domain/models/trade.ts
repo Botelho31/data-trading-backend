@@ -1,6 +1,6 @@
 const { Joi } = require('celebrate')
 
-module.exports = Joi.object({
+export default Joi.object({
   circleId: Joi.string().required(),
   saleFrom: Joi.string().required(),
   saleTo: Joi.string().required(),
