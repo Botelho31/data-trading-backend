@@ -1,7 +1,7 @@
 const crypto = require('crypto');
+const { ethers } = require('ethers');
 const jwtHelper = require('../infra/jwt-helper');
 const dynamoHelper = require('../infra/dynamo-helper');
-const { ethers } = require('ethers');
 
 const tableName = 'user';
 

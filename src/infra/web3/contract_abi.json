@@ -12,9 +12,9 @@
         "type": "string"
       },
       {
-        "internalType": "uint256",
-        "name": "maxNftSupply",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "firstTrader",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -94,6 +94,32 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "saleID",
+        "type": "uint256"
+      }
+    ],
+    "name": "SaleCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "saleID",
+        "type": "uint256"
+      }
+    ],
+    "name": "SaleSold",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "from",
         "type": "address"
@@ -113,68 +139,6 @@
     ],
     "name": "Transfer",
     "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "MATRIX",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [],
-    "name": "MAX_BLOCKS",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [],
-    "name": "MAX_RESERVED_AREA",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
-    "inputs": [],
-    "name": "RESERVED_AREA",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
   },
   {
     "inputs": [
@@ -215,12 +179,23 @@
     "constant": true
   },
   {
-    "inputs": [],
-    "name": "blockPrice",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "entries",
     "outputs": [
       {
+        "internalType": "bool",
+        "name": "hasBeenRequested",
+        "type": "bool"
+      },
+      {
         "internalType": "uint256",
-        "name": "",
+        "name": "allowCount",
         "type": "uint256"
       }
     ],
@@ -274,13 +249,19 @@
     "constant": true
   },
   {
-    "inputs": [],
-    "name": "maxBlockPurchase",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "isTrader",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "bool",
         "name": "",
-        "type": "uint256"
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -394,12 +375,33 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "saleIsActive",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "sales",
     "outputs": [
       {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      },
+      {
         "internalType": "bool",
-        "name": "",
+        "name": "sold",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "active",
         "type": "bool"
       }
     ],
@@ -505,26 +507,6 @@
     "constant": true
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "tokenId",
-        "type": "uint256"
-      }
-    ],
-    "name": "tokenURI",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function",
-    "constant": true
-  },
-  {
     "inputs": [],
     "name": "totalSupply",
     "outputs": [
@@ -575,8 +557,28 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "isTraderPresent",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
     "inputs": [],
-    "name": "withdraw",
+    "name": "requestEntry",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -584,19 +586,12 @@
   {
     "inputs": [
       {
-        "internalType": "uint256[]",
-        "name": "indexes",
-        "type": "uint256[]"
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
       }
     ],
-    "name": "reserveBlocks",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "flipSaleState",
+    "name": "allowEntry",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -604,15 +599,80 @@
   {
     "inputs": [
       {
-        "internalType": "uint256[]",
-        "name": "indexes",
-        "type": "uint256[]"
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
       }
     ],
-    "name": "mintBlock",
+    "name": "hasRequestedEntry",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
+  },
+  {
+    "inputs": [],
+    "name": "exitCircle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "saleAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "weiPrice",
+        "type": "uint256"
+      }
+    ],
+    "name": "createSale",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "saleID",
+        "type": "uint256"
+      }
+    ],
+    "name": "purchaseSale",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function",
     "payable": true
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "tokenId",
+        "type": "uint256"
+      }
+    ],
+    "name": "tokenURI",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function",
+    "constant": true
   }
 ]
