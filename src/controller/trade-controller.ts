@@ -1,10 +1,16 @@
 import { Request, Response, NextFunction } from 'express'
 import knex from '../database'
+import { isTraderPresent } from '../infra/web3/web3-helper'
 
 const tableName = 'trade'
 
-export async function createTrade (req: Request, res: Response, next: NextFunction) {
+export async function createTrade (req: any, res: Response, next: NextFunction) {
   try {
+    const { publicAddress } = req.user
+    const { circleAddress, saleTo, saleFrom } = req.body
+    if (saleTo !== publicAddress && saleFrom !== publicAddress) return res.status(403).json({ message: 'CANT-CREATE-TRADE-FOR-OTHER-TRADER' })
+    const hasPermission = await isTraderPresent(publicAddress, circleAddress)
+    if (!hasPermission) return res.status(403).json({ message: 'USER-IS-NOT-TRADER' })
     await knex(tableName).insert(req.body)
     res.json(req.body)
   } catch (error) {
