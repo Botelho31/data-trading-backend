@@ -43,13 +43,46 @@ export async function updateUserStatus (req: any, res: Response, next: NextFunct
       circleAddress: req.body.circleAddress,
       publicAddress: req.user.publicAddress
     }
-    if (hasBeenRequested) {
+    if (isTrader) {
+      const response = await knex('circle_user').where(obj)
+      if (response.length > 0) return res.json(obj)
+      await knex('circle_user').insert(obj)
+      await knex('entry_request').where(obj).del()
+      return res.json(obj)
+    } else if (hasBeenRequested) {
+      const response = await knex('entry_request').where(obj)
+      if (response.length > 0) return res.json(obj)
       await knex('entry_request').insert(obj)
-      return obj
+      return res.json(obj)
+    }
+    return res.status(403).json({ message: 'REQUEST-HAS-NOT-BEEN-MADE' })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export async function updateEntryStatus (req: any, res: Response, next: NextFunction) {
+  try {
+    const { circleAddress, publicAddress } = req.body
+    const hasPermission = await isTraderPresent(req.user.publicAddress, circleAddress)
+    if (!hasPermission) return res.status(403).json({ message: 'USER-IS-NOT-TRADER' })
+    const hasBeenRequested = await hasRequestedEntry(publicAddress, circleAddress)
+    const isTrader = await isTraderPresent(publicAddress, circleAddress)
+    const obj = {
+      circleAddress,
+      publicAddress
     }
     if (isTrader) {
+      const response = await knex('circle_user').where(obj)
+      if (response.length > 0) return res.json(obj)
       await knex('circle_user').insert(obj)
-      return obj
+      await knex('entry_request').where(obj).del()
+      return res.json(obj)
+    } else if (hasBeenRequested) {
+      const response = await knex('entry_request').where(obj)
+      if (response.length > 0) return res.json(obj)
+      await knex('entry_request').insert(obj)
+      return res.json(obj)
     }
     return res.status(403).json({ message: 'REQUEST-HAS-NOT-BEEN-MADE' })
   } catch (error) {

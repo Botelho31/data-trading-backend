@@ -27,4 +27,14 @@ export default (router: Router): void => {
       })
     }),
     Controller.updateUserStatus)
+
+  router.put(baseRoute + '/update-entry-status',
+    authenticateToken,
+    celebrate({
+      [Segments.BODY]: Joi.object({
+        circleAddress: Joi.string().required(),
+        publicAddress: Joi.string().required()
+      })
+    }),
+    Controller.updateEntryStatus)
 }
