@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon src/server.ts",
+    "reset:database": "knex migrate:rollback && knex migrate:latest && knex seed:run",
     "prepare": "husky install"
   },
   "jest": {

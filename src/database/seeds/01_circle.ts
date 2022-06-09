@@ -6,6 +6,6 @@ export async function seed (knex: Knex): Promise<void> {
 
   // Inserts seed entries
   await knex('circle').insert([
-    { public_address: '0x949e32bF20Ce73b03D0Fe1ECA591386bb00723ff' }
+    { public_address: '0xdF0622888C9386B1DacdFf82FC5873303C091CEA' }
   ])
 };
