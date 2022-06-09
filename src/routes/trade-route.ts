@@ -14,7 +14,7 @@ export default (router: Router): void => {
     }),
     Controller.createTrade)
 
-  router.put(baseRoute + '/enter',
+  router.post(baseRoute + '/enter',
     authenticateToken,
     celebrate({
       [Segments.BODY]: Joi.object({

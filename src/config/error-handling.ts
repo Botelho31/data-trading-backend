@@ -19,6 +19,6 @@ export default (app: Express): void => {
 
   app.use((error: any, req: Request, res: Response) => {
     console.error(error.stack)
-    res.status(500).send('Something broke!')
+    // res.status(500).send('Something broke!')
   })
 }
