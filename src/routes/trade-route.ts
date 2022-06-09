@@ -7,11 +7,12 @@ import { Joi, celebrate, Segments } from 'celebrate'
 const baseRoute = '/trade'
 
 export default (router: Router): void => {
-  router.post(baseRoute + '/',
+  router.post(baseRoute,
     authenticateToken,
     celebrate({
       [Segments.BODY]: Schema
-    }), Controller.createTrade)
+    }),
+    Controller.createTrade)
 
   router.put(baseRoute + '/enter',
     authenticateToken,
