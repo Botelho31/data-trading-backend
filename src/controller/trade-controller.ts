@@ -21,7 +21,10 @@ export async function createTrade (req: any, res: Response, next: NextFunction) 
 export async function enterTrade (req: Request, res: Response, next: NextFunction) {
   try {
     const { idTrade, publicAddress } = req.body
-    const trade = await knex(tableName).where({ idTrade })
+    let trade = await knex(tableName).where({ idTrade })
+    if (trade.length === 0) return res.status(404).json({ message: 'TRADE-DOESNT-EXIST' })
+    trade = trade[0]
+    if (trade.saleTo !== null && trade.saleFrom !== null) return res.status(403).json({ message: 'TRADE-ALREADY-COMPLETED' })
     if (trade.saleTo == null) {
       await knex(tableName).update({ saleTo: publicAddress }).where({ idTrade })
     } else {
