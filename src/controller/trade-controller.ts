@@ -26,9 +26,11 @@ export async function enterTrade (req: Request, res: Response, next: NextFunctio
     trade = trade[0]
     if (trade.saleTo !== null && trade.saleFrom !== null) return res.status(403).json({ message: 'TRADE-ALREADY-COMPLETED' })
     if (trade.saleTo == null) {
-      await knex(tableName).update({ saleTo: publicAddress }).where({ idTrade })
+      if (trade.saleFrom === publicAddress) return res.status(403).json({ message: 'CANT-SELL-TO-SAME-ADDRESS' })
+      await knex(tableName).update({ saleTo: publicAddress, status: 'await_payment' }).where({ idTrade })
     } else {
-      await knex(tableName).update({ saleFrom: publicAddress }).where({ idTrade })
+      if (trade.saleTo === publicAddress) return res.status(403).json({ message: 'CANT-SELL-TO-SAME-ADDRESS' })
+      await knex(tableName).update({ saleFrom: publicAddress, status: 'await_payment' }).where({ idTrade })
     }
     const newTrade = await knex(tableName).where({ idTrade })
     return res.json(newTrade)

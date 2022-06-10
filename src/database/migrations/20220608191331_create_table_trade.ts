@@ -17,6 +17,8 @@ export async function up (knex: Knex): Promise<void> {
     table.string('description').notNullable()
     table.string('name').notNullable()
     table.float('price').notNullable()
+    table.string('status').defaultTo('open')
+    table.timestamp('creation_date').defaultTo(knex.fn.now())
   })
 }
 
