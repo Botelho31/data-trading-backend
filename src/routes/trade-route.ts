@@ -31,4 +31,12 @@ export default (router: Router): void => {
         circleAddress: Joi.string().required()
       })
     }), Controller.getAll)
+
+  router.get(baseRoute + '/validate/:idTrade',
+    authenticateToken,
+    celebrate({
+      [Segments.PARAMS]: Joi.object({
+        idTrade: Joi.string().required()
+      })
+    }), Controller.validateTrade)
 }

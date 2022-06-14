@@ -49,3 +49,18 @@ export async function getAll (req: Request, res: Response, next: NextFunction) {
     return next(error)
   }
 }
+
+export async function validateTrade (req: Request, res: Response, next: NextFunction) {
+  try {
+    const { idTrade } = req.params
+
+    const trades = await knex(tableName).where({ idTrade })
+    if (trades.length === 0) {
+      return res.json({ message: 'Trade do not exist' })
+    } else {
+      return res.json(trades)
+    }
+  } catch (error) {
+    return next(error)
+  }
+}
