@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import knex from '../database'
-import { isTraderPresent } from '../infra/web3/web3-helper'
+import { getTrade, isTraderPresent } from '../infra/web3/web3-helper'
 
 const tableName = 'trade'
 
@@ -55,11 +55,13 @@ export async function validateTrade (req: Request, res: Response, next: NextFunc
     const { idTrade } = req.params
 
     const trades = await knex(tableName).where({ idTrade })
-    if (trades.length === 0) {
-      return res.json({ message: 'Trade do not exist' })
-    } else {
-      return res.json(trades)
-    }
+    if (trades.length === 0) return res.json({ message: 'Trade do not exist' })
+    const trade = trades[0]
+    console.log(trade)
+    const contractTrade = await getTrade('2', trade.circleAddress)
+    if (contractTrade[0] === '0x0000000000000000000000000000000000000000') return res.json({ message: 'Trade has not been payed' })
+    console.log(contractTrade)
+    res.json({})
   } catch (error) {
     return next(error)
   }

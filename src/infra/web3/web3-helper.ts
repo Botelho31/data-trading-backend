@@ -16,7 +16,7 @@ export async function isTraderPresent (address: string, contractAddress: string)
   return response
 }
 
-export async function isTradeExist (idTrade: string, contractAddress: string) {
+export async function getTrade (idTrade: string, contractAddress: string) {
   const DTCContract = new web3.eth.Contract(contractAbi as AbiItem[], contractAddress)
   const response = await DTCContract.methods.getTrade(idTrade).call()
   return response
