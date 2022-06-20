@@ -29,7 +29,7 @@ export async function hasBeenUploaded (idTrade: string, contractAddress: string)
     const gasPrice = await web3.eth.getGasPrice()
     const gas = await DTCContract.methods.hasBeenUploaded(idTrade)
       .estimateGas({
-        from: contractAddress
+        from: process.env.ADMIN_PUBLIC_ADDRESS
       })
 
     const encoded = DTCContract.methods.hasBeenUploaded(
@@ -49,6 +49,7 @@ export async function hasBeenUploaded (idTrade: string, contractAddress: string)
       .on('error', console.log)
     return true
   } catch (error) {
+    console.log(error)
     return false
   }
 }

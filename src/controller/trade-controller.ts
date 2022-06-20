@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import Web3 from 'web3'
 import knex from '../database'
+import { headObjectS3 } from '../infra/s3-helper'
 import { getTrade, hasBeenUploaded, isTraderPresent } from '../infra/web3/web3-helper'
 
 const tableName = 'trade'
@@ -107,10 +108,19 @@ export async function validateUploadFile (req: any, res: Response, next: NextFun
       await knex(tableName).update({ status: 'close' }).where({ idTrade })
       return res.json({ message: 'TRADE-CLOSED' })
     }
-    const uploaded = await hasBeenUploaded(trade.idTrade, trade.circleAddress)
-    if (uploaded) {
-      await knex(tableName).update({ status: 'close' }).where({ idTrade })
-      return res.json({ message: 'TRADE-CLOSED' })
+    let isObjectPresent = false
+    try {
+      await headObjectS3(String(trade.idTrade))
+      isObjectPresent = true
+    } catch (error) {
+      console.log(error)
+    }
+    if (isObjectPresent) {
+      const finished = await hasBeenUploaded(trade.idTrade, trade.circleAddress)
+      if (finished) {
+        await knex(tableName).update({ status: 'close' }).where({ idTrade })
+        return res.json({ message: 'TRADE-CLOSED' })
+      }
     }
     await knex(tableName).update({ status: 'await_files' }).where({ idTrade })
     return res.json({ message: 'TRADE-WAITING-FILES' })

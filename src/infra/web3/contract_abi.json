@@ -685,6 +685,20 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "idTrade",
+        "type": "uint256"
+      }
+    ],
+    "name": "hasBeenUploaded",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function",
+    "payable": true
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "sellerAddress",
         "type": "address"
