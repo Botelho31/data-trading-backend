@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import Web3 from 'web3'
 import knex from '../database'
-import { getTrade, isTraderPresent } from '../infra/web3/web3-helper'
+import { getTrade, hasBeenUploaded, isTraderPresent } from '../infra/web3/web3-helper'
 
 const tableName = 'trade'
 
@@ -78,6 +78,42 @@ export async function validateTrade (req: any, res: Response, next: NextFunction
       await knex(tableName).update({ status: 'await_files' }).where({ idTrade })
       return res.json({ message: 'TRADE-WAITING-FILES' })
     }
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export async function validateUploadFile (req: any, res: Response, next: NextFunction) {
+  try {
+    const { idTrade } = req.params
+    const { publicAddress } = req.user
+
+    const trades = await knex(tableName).where({ idTrade })
+    if (trades.length === 0) return res.json({ message: 'TRADE-DOESNT-EXIST' })
+    const trade = trades[0]
+    if (trade.saleTo !== publicAddress && trade.saleFrom !== publicAddress) return res.status(403).json({ message: 'CANT-VALIDATE-TRADE-FOR-OTHER-TRADER' })
+    const contractTrade = await getTrade(trade.idTrade, trade.circleAddress)
+    if (contractTrade[0] === '0x0000000000000000000000000000000000000000') return res.json({ message: 'TRADE-NOT-PAYED' })
+    let invalidTrade = false
+    invalidTrade = (contractTrade[0] !== trade.saleFrom)
+    invalidTrade = invalidTrade && (contractTrade[1] !== trade.saleTo)
+    invalidTrade = invalidTrade && (contractTrade[2] !== Web3.utils.toWei(String(trade.price), 'ether').toString())
+    invalidTrade = invalidTrade && !contractTrade[4]
+    if (invalidTrade) {
+      await knex(tableName).update({ status: 'cancelled' }).where({ idTrade })
+      return res.json({ message: 'TRADE-CANCELLED-INVALID-DATA' })
+    }
+    if (contractTrade[3]) {
+      await knex(tableName).update({ status: 'close' }).where({ idTrade })
+      return res.json({ message: 'TRADE-CLOSED' })
+    }
+    const uploaded = await hasBeenUploaded(trade.idTrade, trade.circleAddress)
+    if (uploaded) {
+      await knex(tableName).update({ status: 'close' }).where({ idTrade })
+      return res.json({ message: 'TRADE-CLOSED' })
+    }
+    await knex(tableName).update({ status: 'await_files' }).where({ idTrade })
+    return res.json({ message: 'TRADE-WAITING-FILES' })
   } catch (error) {
     return next(error)
   }

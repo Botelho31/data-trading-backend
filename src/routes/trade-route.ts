@@ -40,4 +40,13 @@ export default (router: Router): void => {
       })
     }),
     Controller.validateTrade)
+
+  router.get(baseRoute + '/validateUpload/:idTrade',
+    authenticateToken,
+    celebrate({
+      [Segments.PARAMS]: Joi.object({
+        idTrade: Joi.string().required()
+      })
+    }),
+    Controller.validateUploadFile)
 }
