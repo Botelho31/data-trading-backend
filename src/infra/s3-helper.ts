@@ -50,6 +50,14 @@ export async function headObjectS3 (fileName: string) {
   return s3bucket.headObject(options).promise()
 }
 
+export function getSignedUrl (fileName: string) {
+  const options : AWS.S3.HeadObjectRequest = {
+    Bucket: BUCKET_NAME,
+    Key: fileName
+  }
+  return s3bucket.getSignedUrl('getObject', options)
+}
+
 export async function uploadImageToS3 (fileName: string, fileBody: String) {
   const params : AWS.S3.PutObjectRequest = {
     Bucket: BUCKET_NAME,

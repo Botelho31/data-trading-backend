@@ -49,4 +49,13 @@ export default (router: Router): void => {
       })
     }),
     Controller.validateUploadFile)
+
+  router.get(baseRoute + '/download/:idTrade',
+    authenticateToken,
+    celebrate({
+      [Segments.PARAMS]: Joi.object({
+        idTrade: Joi.string().required()
+      })
+    }),
+    Controller.getDownloadLink)
 }
