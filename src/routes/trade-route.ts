@@ -58,4 +58,25 @@ export default (router: Router): void => {
       })
     }),
     Controller.getDownloadLink)
+
+  router.post(baseRoute + '/get-upload',
+    authenticateToken,
+    celebrate({
+      [Segments.BODY]: Joi.object({
+        idTrade: Joi.number().required(),
+        fileSize: Joi.number().required()
+      })
+    }),
+    Controller.getUploadLink)
+
+  router.post(baseRoute + '/complete-upload',
+    authenticateToken,
+    celebrate({
+      [Segments.BODY]: Joi.object({
+        idTrade: Joi.number().required(),
+        uploadId: Joi.string().required(),
+        parts: Joi.array().required()
+      })
+    }),
+    Controller.completeUpload)
 }

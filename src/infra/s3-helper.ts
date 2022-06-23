@@ -95,3 +95,72 @@ export function decode (data: any) {
   const buff = Buffer.from(data, 'base64')
   return buff
 }
+
+interface Part {
+  ETag: string
+  PartNumber: number
+}
+
+export async function initiateMultipartUpload (fileName: string) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: fileName
+  }
+  const res = await s3bucket.createMultipartUpload(params).promise()
+  return res.UploadId
+}
+
+export async function abortMultipartUpload (fileName: string, uploadId: string) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: fileName,
+    UploadId: uploadId
+  }
+  const res = await s3bucket.abortMultipartUpload(params).promise()
+  return res
+}
+
+export async function generatePresignedUrlsParts (fileName: string, uploadId: string, parts: number) {
+  const baseParams = {
+    Bucket: BUCKET_NAME,
+    Key: fileName,
+    UploadId: uploadId
+  }
+
+  const promises = []
+
+  for (let index = 0; index < parts; index++) {
+    promises.push(
+      s3bucket.getSignedUrlPromise('uploadPart', {
+        ...baseParams,
+        PartNumber: index + 1
+      }))
+  }
+
+  const res = await Promise.all(promises)
+
+  const partsUrl = res.reduce((map, part, index) => {
+    map[index] = part
+    return map
+  }, {} as Record<number, string>)
+
+  const abortUrl = await s3bucket.getSignedUrlPromise('abortMultipartUpload', {
+    ...baseParams
+  })
+
+  return {
+    partsUrl,
+    abortUrl
+  }
+}
+
+export async function completeMultipartUpload (fileName: string, uploadId: string, parts: Part[]) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: fileName,
+    UploadId: uploadId,
+    MultipartUpload: { Parts: parts }
+  }
+
+  await s3bucket.completeMultipartUpload(params).promise()
+}

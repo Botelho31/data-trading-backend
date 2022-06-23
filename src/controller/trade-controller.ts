@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import Web3 from 'web3'
 import knex from '../database'
-import { getSignedUrl, headObjectS3 } from '../infra/s3-helper'
+import { completeMultipartUpload, generatePresignedUrlsParts, getSignedUrl, headObjectS3, initiateMultipartUpload } from '../infra/s3-helper'
 import { getTrade, hasBeenUploaded, isTraderPresent } from '../infra/web3/web3-helper'
 
 const tableName = 'trade'
@@ -149,9 +149,59 @@ export async function getDownloadLink (req: any, res: Response, next: NextFuncti
     }
     if (isObjectPresent && contractTrade[3]) {
       const signedUrl = getSignedUrl(String(trade.idTrade))
-      res.json({ url: signedUrl })
+      return res.json({ url: signedUrl })
     }
     return res.json({ message: 'TRADE-NOT-UPLOADED' })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export async function getUploadLink (req: any, res: Response, next: NextFunction) {
+  try {
+    const { idTrade, fileSize } = req.body
+    const { publicAddress } = req.user
+
+    const trades = await knex(tableName).where({ idTrade })
+    if (trades.length === 0) return res.json({ message: 'TRADE-DOESNT-EXIST' })
+    const trade = trades[0]
+    if (trade.saleFrom !== publicAddress) return res.status(403).json({ message: 'CANT-UPLOAD-TRADE-NOT-SELLER' })
+    const contractTrade = await getTrade(trade.idTrade, trade.circleAddress)
+    if (contractTrade[0] === '0x0000000000000000000000000000000000000000') return res.json({ message: 'TRADE-NOT-PAYED' })
+    let isObjectPresent = false
+    try {
+      await headObjectS3(String(trade.idTrade))
+      isObjectPresent = true
+    } catch (error) {
+      // console.log(error)
+    }
+    if (!isObjectPresent && !contractTrade[3]) {
+      const uploadId = await initiateMultipartUpload(String(trade.idTrade))
+      const partSize = 1024 * 1024 * 5 // 5mb chunks except last part
+      const numParts = Math.ceil(fileSize / partSize)
+      const uploadUrls = await generatePresignedUrlsParts(String(trade.idTrade), uploadId as string, numParts)
+      return res.json({ uploadId, ...uploadUrls })
+    }
+    return res.json({ message: 'TRADE-ALREADY-UPLOADED' })
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export async function completeUpload (req: any, res: Response, next: NextFunction) {
+  try {
+    const { idTrade, uploadId, parts } = req.body
+    const { publicAddress } = req.user
+
+    const trades = await knex(tableName).where({ idTrade })
+    if (trades.length === 0) return res.json({ message: 'TRADE-DOESNT-EXIST' })
+    const trade = trades[0]
+    if (trade.saleFrom !== publicAddress) return res.status(403).json({ message: 'CANT-UPLOAD-TRADE-NOT-SELLER' })
+    const contractTrade = await getTrade(trade.idTrade, trade.circleAddress)
+    if (contractTrade[0] === '0x0000000000000000000000000000000000000000') return res.json({ message: 'TRADE-NOT-PAYED' })
+
+    const response = await completeMultipartUpload(String(trade.idTrade), uploadId, parts)
+    return res.json(response)
   } catch (error) {
     return next(error)
   }
